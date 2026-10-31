@@ -38,9 +38,9 @@ jobs:
   # PRs: plan and comment. Push to main: apply. Schedule/dispatch: plan and open an issue on drift.
   tofu:
     needs: check
-    # Skipped until the GitHub App is configured. Fork PRs don't get secrets, so skip those too.
+    # Skipped until the GitHub App and AWS role are configured. Fork PRs don't get secrets, so skip those too.
     if: >-
-      vars.TOFU_APP_CLIENT_ID != '' &&
+      vars.TOFU_APP_CLIENT_ID != '' && vars.TOFU_AWS_ROLE_ARN != '' &&
       (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     environment: ${{ github.event_name == 'push' && 'production' || '' }}
@@ -50,6 +50,7 @@ jobs:
       cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     permissions:
       contents: read
+      id-token: write # AWS OIDC
       issues: write
       pull-requests: write
     steps:
@@ -67,7 +68,10 @@ jobs:
           private-key: ${{ secrets.TOFU_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
 
-      # TODO(#5): AWS credentials for the S3 state backend. Decision pending.
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.TOFU_AWS_ROLE_ARN }}
+          aws-region: us-east-1
 
       - name: Plan
         id: plan

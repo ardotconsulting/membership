@@ -61,12 +61,6 @@ resource "github_repository_pages" "this" {
   }
 }
 
-# One-time import of the site's existing Pages config. Remove after it's applied.
-import {
-  to = github_repository_pages.this["ardotconsulting-site"]
-  id = "ardotconsulting-site"
-}
-
 # GitHub Repository Vulnerability Alerts Resource
 # https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository_vulnerability_alerts
 resource "github_repository_vulnerability_alerts" "this" {

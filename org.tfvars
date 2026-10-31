@@ -6,7 +6,7 @@ super_admins = [
   "miloardot"
 ]
 
-organizational_teams = {
+organization_teams = {
   "Admins" = {
     description = "Team responsible for the administation of the organization"
     maintainers = [

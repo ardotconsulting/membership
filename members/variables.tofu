@@ -23,12 +23,6 @@ variable "members" {
   default     = []
 }
 
-variable "designers" {
-  description = "A set of designers to add to the organization"
-  type        = set(string)
-  default     = []
-}
-
 variable "organization_teams" {
   description = "Map of Ardot Consulting organization teams to manage"
   type = map(object({

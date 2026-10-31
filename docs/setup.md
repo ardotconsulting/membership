@@ -24,7 +24,8 @@ The pieces that make it run:
 ```mermaid
 flowchart LR
   pr[Pull request] --> c1[check<br/>fmt + validate] --> p1[Plan<br/>both modules] --> cm[PR comment<br/>updated each push]
-  mg[Merge to main] --> c2[check<br/>fmt + validate] --> ap{{Approve<br/>production env}} --> apply[Apply<br/>members, then repos]
+  mg[Merge to main] --> c2[check<br/>fmt + validate] --> p2[Plan<br/>save if changed] -->|changes| ap{{Approve<br/>production env}} --> apply[Apply saved plans<br/>members, then repos]
+  p2 -->|no changes| done[Done<br/>no approval]
   cron[Mondays 14:00 UTC<br/>or a manual run] --> c3[check<br/>fmt + validate] --> p3[Plan<br/>detailed exit code] --> di[Drift issue<br/>opened or updated]
 ```
 
@@ -167,6 +168,11 @@ Two follow-ups made the setup self-enforcing.
 - **`github_team_members` can't be empty.** Any resource that builds `members` blocks dynamically needs a `length(...) > 0` filter.
 - **Import blocks are one-time.** Leaving them in breaks the plan for every new repo you add.
 - **A manual run of the workflow is a drift check.** On a branch with pending changes it opens a false "drift detected" issue. Test changes with a PR instead.
+
+## Later changes
+
+- **No approval for no-change merges (#17).** Every merge used to wait in `production`, and an unapproved no-change apply held the single apply queue, which left the #15 apply stuck. Now the `tofu` job saves the plans, and only a merge with changes runs the `apply` job, which applies those exact plans.
+- **Token out of saved plans.** Saved plans store input variables in plain text, `sensitive` ones included, and anyone can download artifacts from this public repo. So the provider now reads `GITHUB_TOKEN` from the environment instead of `var.github_token`, and the workflow refuses to upload a plan that contains the token.
 
 ## Reference
 

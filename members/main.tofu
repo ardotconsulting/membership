@@ -15,5 +15,5 @@ terraform {
 
 provider "github" {
   owner = "ardotconsulting"
-  token = var.github_token
+  # token comes from the GITHUB_TOKEN environment variable, which keeps it out of saved plans
 }

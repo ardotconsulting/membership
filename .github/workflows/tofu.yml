@@ -35,7 +35,7 @@ jobs:
             tofu -chdir="$m" validate
           done
 
-  # PRs: plan and comment. Push to main: apply. Schedule/dispatch: plan and open an issue on drift.
+  # Plans on every trigger. PRs: comment. Push to main: save the plans for `apply`. Schedule/dispatch: open an issue on drift.
   tofu:
     needs: check
     # Skipped until the GitHub App and AWS role are configured. Fork PRs don't get secrets, so skip those too.
@@ -43,9 +43,9 @@ jobs:
       vars.TOFU_APP_CLIENT_ID != '' && vars.TOFU_AWS_ROLE_ARN != '' &&
       (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
-    environment: ${{ github.event_name == 'push' && 'production' || '' }}
     concurrency:
-      # Applies and drift checks share one queue; each PR gets its own, newest push wins.
+      # main's plans, applies and drift checks share one queue, so nothing plans while an apply awaits approval.
+      # Each PR gets its own queue; the newest push wins.
       group: tofu-${{ github.event_name == 'pull_request' && github.ref || 'main' }}
       cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     permissions:
@@ -53,6 +53,8 @@ jobs:
       id-token: write # AWS OIDC
       issues: write
       pull-requests: write
+    outputs:
+      changed: ${{ steps.plan.outputs.changed }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -83,16 +85,16 @@ jobs:
 
       - name: Plan
         id: plan
-        if: github.event_name != 'push'
         env:
-          TF_VAR_github_token: ${{ steps.app.outputs.token }}
+          # The provider reads GITHUB_TOKEN from the environment. Unlike a variable, it isn't stored in the saved plan.
+          GITHUB_TOKEN: ${{ steps.app.outputs.token }}
         run: |
           changed=false
           for pair in $MODULES; do
             m=${pair%%:*}
             tofu -chdir="$m" init -input=false
             set +e
-            tofu -chdir="$m" plan -input=false -no-color -detailed-exitcode -var-file="../${pair#*:}.tfvars" | tee "$m.plan.txt"
+            tofu -chdir="$m" plan -input=false -no-color -detailed-exitcode -var-file="../${pair#*:}.tfvars" -out="$m.tfplan" | tee "$m.plan.txt"
             code=${PIPESTATUS[0]}
             set -e
             if [ "$code" -eq 1 ]; then exit 1; fi
@@ -133,13 +135,82 @@ jobs:
             gh issue create --title "$title" --body "$body"
           fi
 
-      - name: Apply
-        if: github.event_name == 'push'
+      # Public repo: anyone can download the artifact, so refuse to upload if the token ever lands in a plan.
+      # Plans are zip files, so check the decoded JSON rather than grepping the file.
+      - name: Check plans don't contain the token
+        if: github.event_name == 'push' && steps.plan.outputs.changed == 'true'
         env:
-          TF_VAR_github_token: ${{ steps.app.outputs.token }}
+          GITHUB_TOKEN: ${{ steps.app.outputs.token }}
+        run: |
+          for pair in $MODULES; do
+            m=${pair%%:*}
+            if tofu -chdir="$m" show -json "$m.tfplan" | grep -qF "$GITHUB_TOKEN"; then
+              echo "::error::$m.tfplan contains the GitHub token; not uploading"
+              exit 1
+            fi
+          done
+
+      # The plans hold state and tfvars (already public), never the token (checked above).
+      - name: Save plans for apply
+        if: github.event_name == 'push' && steps.plan.outputs.changed == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: tofu-plans
+          path: "*/*.tfplan"
+          retention-days: 7
+          if-no-files-found: error
+
+  # Only a push to main with changes waits for approval; no-change merges finish without entering production.
+  apply:
+    needs: tofu
+    if: github.event_name == 'push' && needs.tofu.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency:
+      group: tofu-main
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write # AWS OIDC
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+        with:
+          tofu_version: ${{ env.TOFU_VERSION }}
+          tofu_wrapper: false
+      # A fresh token: the plan job's was revoked when that job ended.
+      - id: app
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.TOFU_APP_CLIENT_ID }}
+          private-key: ${{ secrets.TOFU_APP_PRIVATE_KEY }}
+          # OpenTofu manages every org repo, including ones it creates, so the token can't be scoped to a repo list.
+          owner: ${{ github.repository_owner }} # zizmor: ignore[github-app]
+          permission-administration: write
+          permission-members: write
+          permission-metadata: read
+          permission-organization-administration: write
+          permission-organization-custom-org-roles: write
+          permission-pages: write
+
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.TOFU_AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: tofu-plans
+
+      # Applies exactly what was planned; tofu refuses a plan that went stale because state changed since.
+      - name: Apply saved plans
+        env:
+          GITHUB_TOKEN: ${{ steps.app.outputs.token }}
         run: |
           for pair in $MODULES; do
             m=${pair%%:*}
             tofu -chdir="$m" init -input=false
-            tofu -chdir="$m" apply -input=false -auto-approve -var-file="../${pair#*:}.tfvars"
+            tofu -chdir="$m" apply -input=false "$m.tfplan"
           done

@@ -45,16 +45,38 @@ Run `tofu fmt -recursive` before you push.
 | Merge to `main` | `apply` for `members/` and then `repositories/`, after approval in the `production` environment |
 | Mondays at 14:00 UTC, or a manual run | `plan`. If GitHub doesn't match the config, it opens or updates a "OpenTofu drift detected" issue |
 
-The plan, apply and drift jobs authenticate with a GitHub App. They're skipped until the repo has these two settings:
+The plan, apply and drift jobs log in to GitHub with a GitHub App and to AWS with OIDC. They're skipped until the repo has all three of these:
 
 - variable `TOFU_APP_CLIENT_ID`: the App's client ID
 - secret `TOFU_APP_PRIVATE_KEY`: the App's private key
+- variable `TOFU_AWS_ROLE_ARN`: the ARN of the IAM role below
 
 The App needs these permissions:
 - **Organization:** Members, Administration, and Custom organization roles (all read/write)
 - **Repository:** Administration (read/write) and Metadata (read)
 
-AWS credentials for the state backend are still to be decided (#5).
+### AWS setup (one time)
+
+`aws/trust-policy.json` lets the role be assumed only by same-repo PRs, by `main`, and by the `production` environment. A job that uses an environment presents the environment's name to AWS instead of the branch, which is why it's listed separately. `aws/state-policy.json` grants access to the two state files and the lock table, and nothing else.
+
+```sh
+account=$(aws sts get-caller-identity --query Account --output text)
+
+aws iam create-open-id-connect-provider \
+  --url https://token.actions.githubusercontent.com \
+  --client-id-list sts.amazonaws.com
+
+aws iam create-role --role-name github-actions-membership-tofu \
+  --assume-role-policy-document "$(sed "s/ACCOUNT_ID/$account/" aws/trust-policy.json)"
+
+aws iam put-role-policy --role-name github-actions-membership-tofu \
+  --policy-name tofu-state \
+  --policy-document "$(sed "s/ACCOUNT_ID/$account/" aws/state-policy.json)"
+
+gh variable set TOFU_AWS_ROLE_ARN --body "arn:aws:iam::$account:role/github-actions-membership-tofu"
+```
+
+If the account already has a GitHub OIDC provider, skip `create-open-id-connect-provider`. If the bucket's default encryption uses a customer-managed KMS key, add `kms:Decrypt` and `kms:GenerateDataKey` on that key to the state policy.
 
 ## Common changes
 

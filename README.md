@@ -90,7 +90,7 @@ If the account already has a GitHub OIDC provider, skip `create-open-id-connect-
 
 **Add someone to the org:** add their GitHub username to `members` in `org.tfvars`. Put them in `super_admins` instead if they should be an org owner. If a username doesn't exist, it's skipped and listed in the `invalid_users` output.
 
-**Add a repository:** add an entry to `repositories.tfvars`. Repos that already exist get imported. Unless `is_ardotconsulting_repo = true`, each repo also gets three teams:
+**Add a repository:** add an entry to `repositories.tfvars`. New repos are created. To bring a repo that already exists on GitHub under management, add a temporary `import` block for `github_repository.this["<name>"]` and `github_repository_collaborators.this["<name>"]`, then remove it once it's applied. Unless `is_ardotconsulting_repo = true`, each repo also gets three teams:
 
 | Team | Permission | Who's on it |
 |------|------------|-------------|

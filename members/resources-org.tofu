@@ -45,7 +45,7 @@ resource "github_team" "org_teams" {
 resource "github_team_members" "org_team_members" {
   for_each = var.organization_teams
 
-  team_id = github_team.org_teams[each.key].id
+  team_slug = github_team.org_teams[each.key].slug
 
   dynamic "members" {
     for_each = each.value.members

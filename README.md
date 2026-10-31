@@ -35,6 +35,27 @@ tofu -chdir=repositories apply -var-file=../repositories.tfvars
 
 Run `tofu fmt -recursive` before you push.
 
+## CI
+
+`.github/workflows/tofu.yml` runs these jobs:
+
+| Trigger | What runs |
+|---------|-----------|
+| Pull request | `fmt -check` and `validate`, then `plan` for both modules, posted as a PR comment |
+| Merge to `main` | `apply` for `members/` and then `repositories/`, after approval in the `production` environment |
+| Mondays at 14:00 UTC, or a manual run | `plan`. If GitHub doesn't match the config, it opens or updates a "OpenTofu drift detected" issue |
+
+The plan, apply and drift jobs authenticate with a GitHub App. They're skipped until the repo has these two settings:
+
+- variable `TOFU_APP_CLIENT_ID`: the App's client ID
+- secret `TOFU_APP_PRIVATE_KEY`: the App's private key
+
+The App needs these permissions:
+- **Organization:** Members, Administration, and Custom organization roles (all read/write)
+- **Repository:** Administration (read/write) and Metadata (read)
+
+AWS credentials for the state backend are still to be decided (#5).
+
 ## Common changes
 
 **Add someone to the org:** add their GitHub username to `members` in `org.tfvars`. Put them in `super_admins` instead if they should be an org owner. If a username doesn't exist, it's skipped and listed in the `invalid_users` output.

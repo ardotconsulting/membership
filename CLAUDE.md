@@ -24,6 +24,8 @@ tofu fmt -recursive                        # format (run before pushing)
 tofu -chdir=<module> validate              # after init
 ```
 
+CI (`.github/workflows/tofu.yml`) plans on PRs, applies on merge to `main` (gated by the `production` environment), and runs a weekly drift check. If you add a module, update the `MODULES` list there too. Actions are pinned to SHAs. Lint workflow changes with `zizmor .github/workflows/` and `docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:latest`.
+
 ## Architecture
 
 - **`members/`**: org membership and org-level teams. State goes to S3 (`ardotconsulting-tofu-state`, key `members/tfstate.json`, us-east-1) with DynamoDB locking. `super_admins` get the org `admin` role. `admins` and `members` get `member`; being an "admin" only matters through the `Admins` team, which is granted the Security Manager org role (`role_id = 138`). Usernames are validated through `data.github_users`, and unknown logins are dropped silently and reported in the `invalid_users` output.

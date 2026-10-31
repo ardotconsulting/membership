@@ -25,7 +25,7 @@ new-repo name:
         done
         printf '[%s]' "$out"
     }
-    ask() { local reply; read -rp "$1${2:+ [$2]}: " reply; echo "${reply:-$2}"; }
+    ask() { local reply; read -rp "$1${2:+ [$2]}: " reply; echo "${reply:-${2:-}}"; }
     ask_bool() { # ask_bool <key> <default true|false>
         local hint reply
         [[ "$2" == true ]] && hint="Y/n" || hint="y/N"
@@ -123,7 +123,7 @@ new-repo name:
     git pull --ff-only
     git switch -c "add-repo-$name"
 
-    gh repo create "ardotconsulting/$name" --private --description "$description" "${gh_template[@]}"
+    gh repo create "ardotconsulting/$name" --private --description "$description" ${gh_template[@]+"${gh_template[@]}"}
 
     # Drop the map's closing brace, append the entry, close the map again.
     sed -i '' '$d' repositories.tfvars

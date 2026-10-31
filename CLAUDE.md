@@ -24,7 +24,7 @@ tofu fmt -recursive                        # format (run before pushing)
 tofu -chdir=<module> validate              # after init
 ```
 
-CI (`.github/workflows/tofu.yml`) plans on PRs, applies on merge to `main` (gated by the `production` environment), and runs a weekly drift check. If you add a module, update the `MODULES` list there too. Actions are pinned to SHAs. Lint workflow changes with `zizmor .github/workflows/` and `docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:latest`.
+CI (`.github/workflows/tofu.yml`) plans on PRs, applies on merge to `main` (gated by the `production` environment), and runs a weekly drift check. If you add a module, update the `MODULES` list there too. Actions are pinned to SHAs. `.github/workflows/zizmor.yml` audits workflows on every PR as the required check `zizmor`; run `uvx zizmor .github/workflows/` locally first. Your local version must be recent, because older ones miss audits that CI's latest version runs. Also lint with `docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:latest`. The App token in `tofu.yml` requests explicit `permission-*` inputs; add one if a new resource needs more.
 
 ## Architecture
 

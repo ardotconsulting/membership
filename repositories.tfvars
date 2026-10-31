@@ -13,4 +13,11 @@ repositories = {
     topics          = []
     push_allowances = []
   }
+  "ardotconsulting-site" = {
+    description     = "The Website for Ardot Consulting."
+    has_discussions = true
+    has_issues      = true
+    topics          = []
+    push_allowances = []
+  }
 }

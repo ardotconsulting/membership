@@ -19,13 +19,6 @@ locals {
   }
 }
 
-import {
-  for_each = local.project_repositories
-
-  id = each.key
-  to = github_repository_collaborators.this[each.key]
-}
-
 resource "github_repository_collaborators" "this" {
   for_each = local.repo_collaborators
 

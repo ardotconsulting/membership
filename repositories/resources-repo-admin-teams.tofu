@@ -13,7 +13,7 @@ resource "github_team_members" "repo_admin_members" {
   # github_team_members needs at least one members block, so skip repos with no admins.
   for_each = { for k, v in local.project_repositories : k => v if length(v.admins) > 0 }
 
-  team_id = github_team.repo_admin_team[each.key].slug
+  team_slug = github_team.repo_admin_team[each.key].slug
 
   dynamic "members" {
     for_each = each.value.admins

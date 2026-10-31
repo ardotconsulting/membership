@@ -14,7 +14,7 @@ resource "github_team_members" "repo_team_members" {
     if length(setunion(v.members, v.committers, v.admins)) > 0
   }
 
-  team_id = github_team.repo_team[each.key].slug
+  team_slug = github_team.repo_team[each.key].slug
 
   dynamic "members" {
     # Add the admins and committers as members because this is the parent

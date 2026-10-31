@@ -15,7 +15,7 @@ resource "github_team_members" "repo_committer_team_members" {
     if v.is_ardotconsulting_repo == false && length(v.committers) > 0
   }
 
-  team_id = github_team.repo_committer_team[each.key].slug
+  team_slug = github_team.repo_committer_team[each.key].slug
 
   dynamic "members" {
     for_each = each.value.committers

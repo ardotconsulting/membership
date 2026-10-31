@@ -8,7 +8,11 @@ resource "github_team" "repo_team" {
 }
 # Add the people to the team
 resource "github_team_members" "repo_team_members" {
-  for_each = local.project_repositories
+  # github_team_members needs at least one members block, so skip repos with nobody on them.
+  for_each = {
+    for k, v in local.project_repositories : k => v
+    if length(setunion(v.members, v.committers, v.admins)) > 0
+  }
 
   team_id = github_team.repo_team[each.key].slug
 

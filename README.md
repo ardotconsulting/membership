@@ -35,6 +35,8 @@ tofu -chdir=repositories apply -var-file=../repositories.tfvars
 
 Run `tofu fmt -recursive` before you push.
 
+To create a new private repo and open a PR that brings it under OpenTofu, run `just new-repo <name> "<description>"`. Once that PR is applied, delete the `repositories/import-<name>.tofu` file it adds.
+
 ## CI
 
 [docs/setup.md](docs/setup.md) explains how this was set up and why, including the gotchas the first plan caught.

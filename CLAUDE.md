@@ -21,6 +21,7 @@ tofu -chdir=repositories init
 tofu -chdir=repositories plan  -var-file=../repositories.tfvars
 
 tofu fmt -recursive                        # format (run before pushing)
+just new-repo <name> "<description>"      # create a private repo + PR adopting it (needs gh auth)
 tofu -chdir=<module> validate              # after init
 ```
 

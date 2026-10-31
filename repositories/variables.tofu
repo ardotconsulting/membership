@@ -1,12 +1,6 @@
 # Input Variables
 # https://www.terraform.io/language/values/variables
 
-variable "github_token" {
-  description = "The GitHub token used for managing the organization"
-  type        = string
-  sensitive   = true
-}
-
 variable "repositories" {
   description = "Map of repositories to create"
   type = map(object({

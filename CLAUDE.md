@@ -11,7 +11,7 @@ OpenTofu (not Terraform) config managing the `ardotconsulting` GitHub org via th
 There are two independent root modules, `members/` and `repositories/`. Their `.tfvars` files live at the repo root.
 
 ```sh
-export TF_VAR_github_token=...            # required by both modules
+export GITHUB_TOKEN=...                   # required by both modules (provider reads it from env)
 
 tofu -chdir=members init
 tofu -chdir=members plan  -var-file=../org.tfvars
@@ -24,7 +24,7 @@ tofu fmt -recursive                        # format (run before pushing)
 tofu -chdir=<module> validate              # after init
 ```
 
-CI (`.github/workflows/tofu.yml`) plans on PRs, applies on merge to `main` (gated by the `production` environment), and runs a weekly drift check. If you add a module, update the `MODULES` list there too. Actions are pinned to SHAs. `.github/workflows/zizmor.yml` audits workflows on every PR as the required check `zizmor`; run `uvx zizmor .github/workflows/` locally first. Your local version must be recent, because older ones miss audits that CI's latest version runs. Also lint with `docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:latest`. The App token in `tofu.yml` requests explicit `permission-*` inputs; add one if a new resource needs more.
+CI (`.github/workflows/tofu.yml`) plans on PRs and on merge to `main`. If the merge's plan has changes, the plan files are uploaded as an artifact and the `apply` job applies them, gated by the `production` environment; no-change merges skip `apply` entirely. A weekly drift check also runs. Keep the token in the `GITHUB_TOKEN` env var, never a variable: input variables are stored in plain text in saved plans, and the artifact is public. The workflow refuses to upload a plan containing the token. If you add a module, update the `MODULES` list there too. Actions are pinned to SHAs. `.github/workflows/zizmor.yml` audits workflows on every PR as the required check `zizmor`; run `uvx zizmor .github/workflows/` locally first. Your local version must be recent, because older ones miss audits that CI's latest version runs. Also lint with `docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:latest`. The App token in `tofu.yml` requests explicit `permission-*` inputs; add one if a new resource needs more.
 
 ## Architecture
 

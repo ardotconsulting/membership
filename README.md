@@ -15,14 +15,14 @@ Both modules keep their state in the `ardotconsulting-tofu-state` S3 bucket in u
 
 - OpenTofu
 - AWS credentials that can read and write the state bucket and the lock table
-- A GitHub token with org owner permissions, exported as `TF_VAR_github_token`
+- A GitHub token with org owner permissions, exported as `GITHUB_TOKEN`. The provider reads it from the environment, which keeps it out of saved plans.
 
 ## Usage
 
 Apply `members/` before `repositories/`, because `repositories/` reads the `Admins` team.
 
 ```sh
-export TF_VAR_github_token=...
+export GITHUB_TOKEN=...
 
 tofu -chdir=members init
 tofu -chdir=members plan  -var-file=../org.tfvars
@@ -46,7 +46,7 @@ Run `tofu fmt -recursive` before you push.
 | Trigger | What runs |
 |---------|-----------|
 | Pull request | `fmt -check` and `validate`, then `plan` for both modules, posted as a PR comment |
-| Merge to `main` | `apply` for `members/` and then `repositories/`, after approval in the `production` environment |
+| Merge to `main` | `plan`. If anything would change, the saved plans are uploaded, and the `apply` job applies exactly those (`members/` then `repositories/`) after approval in the `production` environment. A merge with no changes finishes without waiting for approval. |
 | Mondays at 14:00 UTC, or a manual run | `plan`. If GitHub doesn't match the config, it opens or updates a "OpenTofu drift detected" issue |
 
 The plan, apply and drift jobs log in to GitHub with a GitHub App and to AWS with OIDC. They're skipped until the repo has all three of these:

@@ -46,7 +46,6 @@ resource "github_team_settings" "this" {
   review_request_delegation {
     algorithm    = "LOAD_BALANCE"
     member_count = 2
-    notify       = false
   }
 
   team_id = github_team.repo_team[each.key].slug

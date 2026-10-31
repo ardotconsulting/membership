@@ -25,21 +25,6 @@ resource "github_repository" "this" {
   name                        = each.key
   topics                      = each.value.topics
   visibility                  = each.value.visibility
-  vulnerability_alerts        = true
-  dynamic "pages" {
-    for_each = each.value.pages != null ? [each.value.pages] : []
-    content {
-      dynamic "source" {
-        for_each = pages.value.source != null ? [pages.value.source] : []
-        content {
-          branch = source.value.branch
-          path   = source.value.path
-        }
-      }
-      build_type = pages.value.build_type
-      cname      = pages.value.cname
-    }
-  }
 
   dynamic "template" {
     for_each = each.value.template != null ? [each.value.template] : []
@@ -50,4 +35,43 @@ resource "github_repository" "this" {
       include_all_branches = template.value.include_all_branches
     }
   }
+
+  # Managed by github_repository_pages and github_repository_vulnerability_alerts below.
+  # Ignoring pages is required: removing it from this resource otherwise calls DisablePages.
+  lifecycle {
+    ignore_changes = [pages, vulnerability_alerts]
+  }
+}
+
+# GitHub Repository Pages Resource
+# https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository_pages
+resource "github_repository_pages" "this" {
+  for_each = { for k, v in var.repositories : k => v if v.pages != null }
+
+  repository = github_repository.this[each.key].name
+  build_type = each.value.pages.build_type
+  cname      = each.value.pages.cname
+
+  dynamic "source" {
+    for_each = each.value.pages.source != null ? [each.value.pages.source] : []
+    content {
+      branch = source.value.branch
+      path   = source.value.path
+    }
+  }
+}
+
+# One-time import of the site's existing Pages config. Remove after it's applied.
+import {
+  to = github_repository_pages.this["ardotconsulting-site"]
+  id = "ardotconsulting-site"
+}
+
+# GitHub Repository Vulnerability Alerts Resource
+# https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository_vulnerability_alerts
+resource "github_repository_vulnerability_alerts" "this" {
+  for_each = var.repositories
+
+  repository = github_repository.this[each.key].name
+  enabled    = true
 }

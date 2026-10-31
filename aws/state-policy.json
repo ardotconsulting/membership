@@ -17,15 +17,13 @@
       ]
     },
     {
-      "Sid": "StateLock",
+      "Sid": "StateLockFiles",
       "Effect": "Allow",
-      "Action": [
-        "dynamodb:DescribeTable",
-        "dynamodb:GetItem",
-        "dynamodb:PutItem",
-        "dynamodb:DeleteItem"
-      ],
-      "Resource": "arn:aws:dynamodb:us-east-1:ACCOUNT_ID:table/ardotconsulting-tofu-state-lock"
+      "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+      "Resource": [
+        "arn:aws:s3:::ardotconsulting-tofu-state/members/tfstate.json.tflock",
+        "arn:aws:s3:::ardotconsulting-tofu-state/repositories/tfstate.json.tflock"
+      ]
     }
   ]
 }

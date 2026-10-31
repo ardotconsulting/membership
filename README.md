@@ -9,7 +9,7 @@ Manages the [ardotconsulting](https://github.com/ardotconsulting) GitHub organiz
 | `members/` | Org membership, org teams (`Admins`, `super-admins`) | `org.tfvars` |
 | `repositories/` | Repositories and their per-repo teams | `repositories.tfvars` |
 
-Both modules keep their state in the `ardotconsulting-tofu-state` S3 bucket in us-east-1, with locking through DynamoDB.
+Both modules keep their state in the `ardotconsulting-tofu-state` S3 bucket in us-east-1. Locking uses lock files in the same bucket (`use_lockfile`).
 
 ## Prerequisites
 
@@ -57,10 +57,18 @@ The App needs these permissions:
 
 ### AWS setup (one time)
 
-`aws/trust-policy.json` lets the role be assumed only by same-repo PRs, by `main`, and by the `production` environment. A job that uses an environment presents the environment's name to AWS instead of the branch, which is why it's listed separately. `aws/state-policy.json` grants access to the two state files and the lock table, and nothing else.
+`aws/trust-policy.json` lets the role be assumed only by same-repo PRs, by `main`, and by the `production` environment. A job that uses an environment presents the environment's name to AWS instead of the branch, which is why it's listed separately. `aws/state-policy.json` grants access to the two state files and their lock files, and nothing else.
 
 ```sh
 account=$(aws sts get-caller-identity --query Account --output text)
+
+# State bucket. Versioning lets you roll back a bad state write.
+aws s3api create-bucket --bucket ardotconsulting-tofu-state --region us-east-1
+aws s3api put-bucket-versioning --bucket ardotconsulting-tofu-state \
+  --versioning-configuration Status=Enabled
+aws s3api put-public-access-block --bucket ardotconsulting-tofu-state \
+  --public-access-block-configuration \
+  BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
 
 aws iam create-open-id-connect-provider \
   --url https://token.actions.githubusercontent.com \
@@ -71,7 +79,7 @@ aws iam create-role --role-name github-actions-membership-tofu \
 
 aws iam put-role-policy --role-name github-actions-membership-tofu \
   --policy-name tofu-state \
-  --policy-document "$(sed "s/ACCOUNT_ID/$account/" aws/state-policy.json)"
+  --policy-document file://aws/state-policy.json
 
 gh variable set TOFU_AWS_ROLE_ARN --body "arn:aws:iam::$account:role/github-actions-membership-tofu"
 ```

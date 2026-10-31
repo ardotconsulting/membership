@@ -1,0 +1,26 @@
+name: zizmor
+
+# No path filters: this is a required check, and a filtered-out required check blocks merging.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 15 * * 1" # weekly, so new audits catch existing workflows
+
+permissions: {}
+
+jobs:
+  zizmor:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Annotations instead of SARIF: zizmor then fails the job on findings, which is what the required check needs.
+      - uses: zizmorcore/zizmor-action@53290badfa369cb0bf7ad16342cb62c2fa47ac7b # v0.8.0
+        with:
+          advanced-security: false
+          annotations: true

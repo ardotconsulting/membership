@@ -39,6 +39,8 @@ Run `tofu fmt -recursive` before you push.
 
 [docs/setup.md](docs/setup.md) explains how this was set up and why, including the gotchas the first plan caught.
 
+`.github/workflows/zizmor.yml` runs a security audit of the workflows on every PR, on pushes to `main`, and weekly. It's a required check, and findings appear as annotations on the PR.
+
 `.github/workflows/tofu.yml` runs these jobs:
 
 | Trigger | What runs |

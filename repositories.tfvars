@@ -8,6 +8,7 @@ repositories = {
   }
   "marketing-plan" = {
     description     = "The marketing plan repository for Ardot Consulting."
+    visibility      = "private"
     has_discussions = true
     has_issues      = true
     topics          = []
@@ -15,9 +16,14 @@ repositories = {
   }
   "ardotconsulting-site" = {
     description     = "The Website for Ardot Consulting."
+    homepage_url    = "https://www.ardotconsulting.com/"
     has_discussions = true
     has_issues      = true
     topics          = []
     push_allowances = []
+    pages = {
+      build_type = "workflow"
+      cname      = "www.ardotconsulting.com"
+    }
   }
 }

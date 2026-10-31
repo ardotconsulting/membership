@@ -2,7 +2,7 @@
 # https://www.terraform.io/language/values/locals
 
 data "github_team" "admins_team" {
-  slug = "Admins"
+  slug = "admins" # GitHub slugifies the "Admins" team name to lowercase
 }
 
 locals {

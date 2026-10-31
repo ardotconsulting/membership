@@ -37,6 +37,8 @@ Run `tofu fmt -recursive` before you push.
 
 ## CI
 
+[docs/setup.md](docs/setup.md) explains how this was set up and why, including the gotchas the first plan caught.
+
 `.github/workflows/tofu.yml` runs these jobs:
 
 | Trigger | What runs |

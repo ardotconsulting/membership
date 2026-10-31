@@ -26,4 +26,12 @@ repositories = {
       cname      = "www.ardotconsulting.com"
     }
   }
+  "test-repo-to-be-deleted" = {
+    description             = ""
+    visibility              = "private"
+    topics                  = ["automation"]
+    has_projects            = false
+    has_discussions         = false
+    is_ardotconsulting_repo = true
+  }
 }

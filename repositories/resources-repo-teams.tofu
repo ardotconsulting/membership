@@ -1,4 +1,4 @@
-# Create the main repository team for Django Commons.
+# Create the main repository team for Ardot Consulting.
 resource "github_team" "repo_team" {
   for_each = local.project_repositories
 

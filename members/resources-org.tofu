@@ -28,12 +28,12 @@ resource "github_membership" "this" {
 
 resource "github_organization_role_team" "admins_security_manager" {
   # Can be confirmed by inspecting the input for the Security Manager role at:
-  # https://github.com/organizations/django-commons/settings/org_role_assignments/new
+  # https://github.com/organizations/ardotconsulting/settings/org_role_assignments/new
   role_id   = 138
   team_slug = github_team.org_teams["Admins"].slug
 }
 
-# Create the organization teams for Django Commons.
+# Create the organization teams for Ardot Consulting.
 resource "github_team" "org_teams" {
   for_each = var.organization_teams
 

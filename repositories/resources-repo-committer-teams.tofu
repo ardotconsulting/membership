@@ -12,7 +12,7 @@ resource "github_team" "repo_committer_team" {
 resource "github_team_members" "repo_committer_team_members" {
   for_each = {
     for k, v in var.repositories : k => v
-    if v.is_django_commons_repo == false && length(v.committers) > 0
+    if v.is_ardotconsulting_repo == false && length(v.committers) > 0
   }
 
   team_id = github_team.repo_committer_team[each.key].slug
@@ -31,7 +31,7 @@ resource "github_team_members" "repo_committer_team_members" {
 resource "github_team_repository" "repo_committer_team_access" {
   for_each = {
     for k, v in var.repositories : k => v
-    if v.is_django_commons_repo == false
+    if v.is_ardotconsulting_repo == false
   }
   repository = each.key
   team_id    = github_team.repo_committer_team[each.key].slug

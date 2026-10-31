@@ -30,7 +30,7 @@ variable "designers" {
 }
 
 variable "organization_teams" {
-  description = "Map of Django Commons organization teams to manage"
+  description = "Map of Ardot Consulting organization teams to manage"
   type = map(object({
     description               = string
     maintainers               = optional(set(string), [])

@@ -11,9 +11,9 @@
         "StringEquals": {
           "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
           "token.actions.githubusercontent.com:sub": [
-            "repo:ardotconsulting/membership:pull_request",
-            "repo:ardotconsulting/membership:ref:refs/heads/main",
-            "repo:ardotconsulting/membership:environment:production"
+            "repo:ardotconsulting@350385434/membership@1441045555:pull_request",
+            "repo:ardotconsulting@350385434/membership@1441045555:ref:refs/heads/main",
+            "repo:ardotconsulting@350385434/membership@1441045555:environment:production"
           ]
         }
       }

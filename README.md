@@ -57,7 +57,7 @@ The App needs these permissions:
 
 ### AWS setup (one time)
 
-`aws/trust-policy.json` lets the role be assumed only by same-repo PRs, by `main`, and by the `production` environment. A job that uses an environment presents the environment's name to AWS instead of the branch, which is why it's listed separately. `aws/state-policy.json` grants access to the two state files and their lock files, and nothing else.
+`aws/trust-policy.json` lets the role be assumed only by same-repo PRs, by `main`, and by the `production` environment. A job that uses an environment presents the environment's name to AWS instead of the branch, which is why it's listed separately. The repo uses GitHub's immutable subject format, so the policy names the org and repo by their numeric IDs (`ardotconsulting@350385434/membership@1441045555`). That way it can't be matched by a renamed or re-created org or repo. To see the current format, run `gh api repos/ardotconsulting/membership/actions/oidc/customization/sub`. `aws/state-policy.json` grants access to the two state files and their lock files, and nothing else.
 
 ```sh
 account=$(aws sts get-caller-identity --query Account --output text)

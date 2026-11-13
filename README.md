@@ -61,36 +61,11 @@ The App needs these permissions:
 - **Organization:** Members, Administration, and Custom organization roles (all read/write)
 - **Repository:** Administration (read/write) and Metadata (read)
 
-### AWS setup (one time)
+### AWS setup
 
-`aws/trust-policy.json` lets the role be assumed only by same-repo PRs, by `main`, and by the `production` environment. A job that uses an environment presents the environment's name to AWS instead of the branch, which is why it's listed separately. The repo uses GitHub's immutable subject format, so the policy names the org and repo by their numeric IDs (`ardotconsulting@350385434/membership@1441045555`). That way it can't be matched by a renamed or re-created org or repo. To see the current format, run `gh api repos/ardotconsulting/membership/actions/oidc/customization/sub`. `aws/state-policy.json` grants access to the two state files and their lock files, and nothing else.
+The state bucket (`ardotconsulting-tfstate`, us-west-2), the GitHub OIDC provider and the `github-actions-membership-tofu` role live in the ardotconsulting lab AWS account. They're managed with OpenTofu in [ardotconsulting/infra](https://github.com/ardotconsulting/infra), in `bootstrap/s3.tf` and `bootstrap/github-oidc.tf`; change them there, not here.
 
-```sh
-account=$(aws sts get-caller-identity --query Account --output text)
-
-# State bucket. Versioning lets you roll back a bad state write.
-aws s3api create-bucket --bucket ardotconsulting-tofu-state --region us-east-1
-aws s3api put-bucket-versioning --bucket ardotconsulting-tofu-state \
-  --versioning-configuration Status=Enabled
-aws s3api put-public-access-block --bucket ardotconsulting-tofu-state \
-  --public-access-block-configuration \
-  BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
-
-aws iam create-open-id-connect-provider \
-  --url https://token.actions.githubusercontent.com \
-  --client-id-list sts.amazonaws.com
-
-aws iam create-role --role-name github-actions-membership-tofu \
-  --assume-role-policy-document "$(sed "s/ACCOUNT_ID/$account/" aws/trust-policy.json)"
-
-aws iam put-role-policy --role-name github-actions-membership-tofu \
-  --policy-name tofu-state \
-  --policy-document file://aws/state-policy.json
-
-gh variable set TOFU_AWS_ROLE_ARN --body "arn:aws:iam::$account:role/github-actions-membership-tofu"
-```
-
-If the account already has a GitHub OIDC provider, skip `create-open-id-connect-provider`. If the bucket's default encryption uses a customer-managed KMS key, add `kms:Decrypt` and `kms:GenerateDataKey` on that key to the state policy.
+The role can be assumed only by same-repo PRs, by `main`, and by the `production` environment. A job that uses an environment presents the environment's name to AWS instead of the branch, which is why it's listed separately. The trust policy uses GitHub's immutable subject format, naming the org and repo by their numeric IDs (`ardotconsulting@350385434/membership@1441045555`), so it can't be matched by a renamed or re-created org or repo. To see the current format, run `gh api repos/ardotconsulting/membership/actions/oidc/customization/sub`. The role can read and write the two state files and their lock files, and nothing else. The repo variable `TOFU_AWS_ROLE_ARN` holds its ARN.
 
 ## Common changes
 

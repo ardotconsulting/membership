@@ -3,7 +3,8 @@ admins = [
 ]
 
 super_admins = [
-  "miloardot"
+  "miloardot",
+  "ryancheley",
 ]
 
 organization_teams = {

@@ -12,6 +12,9 @@ organization_teams = {
     maintainers = [
       "miloardot"
     ]
+    members = [
+      "ryancheley"
+    ]
   }
   "super-admins" = {
     description = "Team responsible for performing privelaged operations."

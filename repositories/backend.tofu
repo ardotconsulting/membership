@@ -3,9 +3,9 @@
 
 terraform {
   backend "s3" {
-    bucket       = "ardotconsulting-tofu-state"
+    bucket       = "ardotconsulting-tfstate"
     key          = "repositories/tfstate.json"
-    region       = "us-east-1"
+    region       = "us-west-2"
     use_lockfile = true
     encrypt      = true
   }

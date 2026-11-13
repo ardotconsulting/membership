@@ -9,7 +9,7 @@ Manages the [ardotconsulting](https://github.com/ardotconsulting) GitHub organiz
 | `members/` | Org membership, org teams (`Admins`, `super-admins`) | `org.tfvars` |
 | `repositories/` | Repositories and their per-repo teams | `repositories.tfvars` |
 
-Both modules keep their state in the `ardotconsulting-tofu-state` S3 bucket in us-east-1. Locking uses lock files in the same bucket (`use_lockfile`).
+Both modules keep their state in the `ardotconsulting-tfstate` S3 bucket in us-west-2. Locking uses lock files in the same bucket (`use_lockfile`).
 
 ## Prerequisites
 

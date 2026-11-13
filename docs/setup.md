@@ -2,6 +2,8 @@
 
 Written 2026-10-31 by Ryan Cheley.
 
+> **Update 2026-11-13:** state moved to the `ardotconsulting-tfstate` bucket (us-west-2) in the ardotconsulting lab AWS account ([#25](https://github.com/ardotconsulting/membership/pull/25)). The bucket, OIDC provider and role are now managed with OpenTofu in [ardotconsulting/infra](https://github.com/ardotconsulting/infra) (`bootstrap/`), and `aws/*.json` was removed from this repo. Step 6 below describes the original setup.
+
 ## Overview
 
 The ardotconsulting GitHub org is now managed entirely through OpenTofu in CI. Every PR posts a plan, every merge to `main` applies after one approval, and a weekly check flags drift. This took ten PRs (#1 to #10) and one issue (#5). The first full apply finished with 0 resources destroyed.
@@ -18,7 +20,7 @@ The pieces that make it run:
 | `.github/workflows/tofu.yml` | `fmt`/`validate` on every PR, plan on PRs, apply on merge, weekly drift check |
 | GitHub App `ardotconsulting-tofu` | Supplies a token that expires after an hour for managing the org |
 | AWS OIDC role `github-actions-membership-tofu` | Gives CI access to state without stored AWS keys |
-| S3 bucket `ardotconsulting-tofu-state` | Holds state for both modules, locked with `.tflock` files |
+| S3 bucket `ardotconsulting-tfstate` (lab AWS account, us-west-2) | Holds state for both modules, locked with `.tflock` files |
 | `production` environment + `main` ruleset | One approval before an apply; required checks with no bypass |
 
 ```mermaid
@@ -179,7 +181,7 @@ Two follow-ups made the setup self-enforcing.
 | Item | Value |
 | --- | --- |
 | OpenTofu | 1.13.2; provider `integrations/github` 6.9.0 |
-| State bucket | `ardotconsulting-tofu-state` (us-east-1), keys `members/tfstate.json` and `repositories/tfstate.json` |
+| State bucket | `ardotconsulting-tfstate` (us-west-2, lab AWS account), keys `members/tfstate.json` and `repositories/tfstate.json` |
 | IAM role | `github-actions-membership-tofu` (full ARN in the `TOFU_AWS_ROLE_ARN` repo variable) |
 | GitHub App | `ardotconsulting-tofu`, installed on all repos |
 | Repo variables | `TOFU_APP_CLIENT_ID`, `TOFU_AWS_ROLE_ARN` |

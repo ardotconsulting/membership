@@ -17,6 +17,7 @@ repositories = {
   "ardotconsulting-site" = {
     description     = "The Website for Ardot Consulting."
     homepage_url    = "https://www.ardotconsulting.com/"
+    committers      = ["miloardot"] # the agents publish blog posts
     has_discussions = true
     has_issues      = true
     topics          = []

@@ -19,6 +19,7 @@ variable "repositories" {
     push_allowances                 = optional(list(string), [])
     required_status_checks_contexts = optional(list(string), [])
     is_template                     = optional(bool, false) # Is the repository a template repository
+    allow_forking                   = optional(bool)        # Private repos only; null leaves GitHub's setting alone
     topics                          = optional(list(string))
     visibility                      = optional(string, "public")
     is_ardotconsulting_repo         = optional(bool, false)     # Do not create teams for repository

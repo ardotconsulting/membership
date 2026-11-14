@@ -27,4 +27,16 @@ repositories = {
       cname      = "www.ardotconsulting.com"
     }
   }
+  "infra" = {
+    description         = "OpenTofu for the ardotconsulting lab."
+    visibility          = "private"
+    allow_forking       = true # the agents open PRs from miloardot/infra
+    has_discussions     = false
+    allow_merge_commit  = true
+    allow_rebase_merge  = true
+    allow_update_branch = false
+    members             = ["miloardot"] # triage: can fork and open PRs, can't push
+    topics              = []
+    push_allowances     = []
+  }
 }

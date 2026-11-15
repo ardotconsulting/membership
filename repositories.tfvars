@@ -39,4 +39,13 @@ repositories = {
     topics              = []
     push_allowances     = []
   }
+  "pocs" = {
+    description            = "Proofs of concept from the ardotconsulting blog, deployed on the lab Coolify with OpenTofu."
+    auto_init              = true
+    protect_default_branch = true
+    has_discussions        = false
+    committers             = ["miloardot"] # the agents propose POCs here; Ryan approves and applies
+    topics                 = []
+    push_allowances        = []
+  }
 }

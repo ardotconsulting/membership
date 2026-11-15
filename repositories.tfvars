@@ -45,7 +45,11 @@ repositories = {
     protect_default_branch = true
     has_discussions        = false
     committers             = ["miloardot"] # the agents propose POCs here; Ryan approves and applies
-    topics                 = []
-    push_allowances        = []
+    environments = {
+      plan       = {}                             # CI plans with the stack's secrets
+      production = { reviewers = ["ryancheley"] } # CI applies after Ryan approves
+    }
+    topics          = []
+    push_allowances = []
   }
 }

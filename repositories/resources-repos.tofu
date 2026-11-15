@@ -7,6 +7,7 @@ resource "github_repository" "this" {
   homepage_url                = each.value.homepage_url
   allow_auto_merge            = each.value.allow_auto_merge
   allow_forking               = each.value.allow_forking
+  auto_init                   = each.value.auto_init
   allow_merge_commit          = each.value.allow_merge_commit
   merge_commit_title          = each.value.merge_commit_title
   merge_commit_message        = each.value.merge_commit_message

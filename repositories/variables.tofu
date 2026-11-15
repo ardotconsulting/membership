@@ -20,6 +20,8 @@ variable "repositories" {
     required_status_checks_contexts = optional(list(string), [])
     is_template                     = optional(bool, false) # Is the repository a template repository
     allow_forking                   = optional(bool)        # Private repos only; null leaves GitHub's setting alone
+    auto_init                       = optional(bool, false) # Create with a README commit; only matters when the repo is created
+    protect_default_branch          = optional(bool, false) # Ruleset: PR with one approval, no force push or deletion. Public repos only on the Free plan
     topics                          = optional(list(string))
     visibility                      = optional(string, "public")
     is_ardotconsulting_repo         = optional(bool, false)     # Do not create teams for repository

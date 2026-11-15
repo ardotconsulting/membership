@@ -18,7 +18,7 @@ resource "github_repository_ruleset" "default_branch" {
   # Org admins (Ryan) can merge their own PRs without a second reviewer, but
   # still only through a PR.
   bypass_actors {
-    actor_id    = 1
+    actor_id    = 0 # GitHub ignores the ID for OrganizationAdmin and stores 0
     actor_type  = "OrganizationAdmin"
     bypass_mode = "pull_request"
   }

@@ -47,7 +47,8 @@ repositories = {
     committers             = ["miloardot"] # the agents propose POCs here; Ryan approves and applies
     environments = {
       plan       = {}                             # CI plans with the stack's secrets
-      production = { reviewers = ["ryancheley"] } # CI applies after Ryan approves
+      apply      = {}                             # CI applies plans that destroy nothing
+      production = { reviewers = ["ryancheley"] } # CI applies plans with destroys after Ryan approves
     }
     topics          = []
     push_allowances = []

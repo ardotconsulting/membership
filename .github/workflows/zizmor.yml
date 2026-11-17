@@ -20,7 +20,7 @@ jobs:
         with:
           persist-credentials: false
       # Annotations instead of SARIF: zizmor then fails the job on findings, which is what the required check needs.
-      - uses: zizmorcore/zizmor-action@v0.8.0
+      - uses: zizmorcore/zizmor-action@v0.8.1
         with:
           version: 1.32.0 # first version that understands actions.lock
           advanced-security: false

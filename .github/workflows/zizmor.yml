@@ -16,11 +16,26 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
       # Annotations instead of SARIF: zizmor then fails the job on findings, which is what the required check needs.
-      - uses: zizmorcore/zizmor-action@53290badfa369cb0bf7ad16342cb62c2fa47ac7b # v0.8.0
+      - uses: zizmorcore/zizmor-action@v0.8.0
         with:
+          version: 1.32.0 # first version that understands actions.lock
           advanced-security: false
           annotations: true
+
+  # Every action, direct or transitive, must match .github/workflows/actions.lock.
+  # A new or changed workflow needs `gh actions-lock` re-run, or this fails.
+  lockfile:
+    runs-on: ubuntu-slim
+    permissions: {}
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - run: gh extension install github/gh-actions-lock --pin v0.4.1
+      - run: gh actions-lock --verify

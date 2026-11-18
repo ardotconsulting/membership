@@ -15,6 +15,7 @@ repositories = {
     push_allowances = []
   }
   "ardotconsulting-site" = {
+    codeowners      = ["ryancheley"] # review requests email Ryan
     description     = "The Website for Ardot Consulting."
     homepage_url    = "https://www.ardotconsulting.com/"
     committers      = ["miloardot"] # the agents publish blog posts
@@ -40,6 +41,7 @@ repositories = {
     push_allowances     = []
   }
   "pocs" = {
+    codeowners             = ["ryancheley"] # review requests email Ryan
     description            = "Proofs of concept from the ardotconsulting blog, deployed on the lab Coolify with OpenTofu."
     auto_init              = true
     protect_default_branch = true

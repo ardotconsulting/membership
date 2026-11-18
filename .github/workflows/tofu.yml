@@ -71,8 +71,9 @@ jobs:
           private-key: ${{ secrets.TOFU_APP_PRIVATE_KEY }}
           # OpenTofu manages every org repo, including ones it creates, so the token can't be scoped to a repo list.
           owner: ${{ github.repository_owner }} # zizmor: ignore[github-app]
-          # Only what the config needs; the installation also has Contents write, which is left out.
+          # Only what the config needs (Contents: the managed .github/CODEOWNERS files).
           permission-administration: write
+          permission-contents: write
           permission-members: write
           permission-metadata: read
           permission-organization-administration: write
@@ -190,6 +191,7 @@ jobs:
           # OpenTofu manages every org repo, including ones it creates, so the token can't be scoped to a repo list.
           owner: ${{ github.repository_owner }} # zizmor: ignore[github-app]
           permission-administration: write
+          permission-contents: write
           permission-members: write
           permission-metadata: read
           permission-organization-administration: write

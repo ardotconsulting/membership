@@ -23,6 +23,14 @@ resource "github_repository_ruleset" "default_branch" {
     bypass_mode = "pull_request"
   }
 
+  # This repo's GitHub App (ardotconsulting-tofu), so it can write managed files
+  # such as .github/CODEOWNERS to a protected main.
+  bypass_actors {
+    actor_id    = 5558573
+    actor_type  = "Integration"
+    bypass_mode = "always"
+  }
+
   rules {
     deletion         = true
     non_fast_forward = true

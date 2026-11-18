@@ -22,6 +22,7 @@ variable "repositories" {
     allow_forking                   = optional(bool)                                                       # Private repos only; null leaves GitHub's setting alone
     auto_init                       = optional(bool, false)                                                # Create with a README commit; only matters when the repo is created
     environments                    = optional(map(object({ reviewers = optional(set(string), []) })), {}) # Deployment environments, usable only from main
+    codeowners                      = optional(list(string), [])                                           # GitHub users whose review every PR requests (writes .github/CODEOWNERS)
     protect_default_branch          = optional(bool, false)                                                # Ruleset: PR with one approval, no force push or deletion. Public repos only on the Free plan
     topics                          = optional(list(string))
     visibility                      = optional(string, "public")
